@@ -1,0 +1,37 @@
+﻿@model ChargeMachineViewModel
+
+<form asp-controller="ChargeMachines" asp-action="AddNewStation" method="post">
+  <div class="form-group mb-forms">
+    <label asp-for="City"></label>
+    <input type="text" class="form-control" asp-for="City" placeholder="City">
+     <span asp-validation-for="City" class="text-danger"></span>
+  </div>
+
+  <div class="form-group mb-forms">
+    <label asp-for="Street"></label>
+    <input type="text" class="form-control" asp-for="Street" placeholder="Street">
+     <span asp-validation-for="Street" class="text-danger"></span>
+  </div>
+
+  <div class="form-group mb-forms">
+    <label asp-for="Number"></label>
+    <input type="number" class="form-control" asp-for="Number" placeholder="Number">
+     <span asp-validation-for="Number" class="text-danger"></span>
+  </div>
+
+  <div class="form-group mb-forms">
+    <label asp-for="Longitude"></label>
+    <input type="number" step="0.000001" class="form-control" asp-for="Longitude" placeholder="Longitude">
+    <span asp-validation-for="Longitude" class="text-danger"></span>
+  </div>
+
+  <div class="form-group mb-forms">
+    <label asp-for="Latitude"></label>
+    <input type="number" step="0.000001" class="form-control" asp-for="Latitude" placeholder="Latitude">
+    <span asp-validation-for="Latitude" class="text-danger"></span>
+  </div>
+
+  <button type="submit" class="btn btn-success">Save</button>
+  <a type="button" class="btn btn-primary" asp-area="" asp-controller="ChargeMachines" asp-action="Index">Cancel</a>
+
+</form>
