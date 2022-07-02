@@ -1,0 +1,15 @@
+﻿@model CarViewModel
+
+<h1 class="display-4 mb-4">New car</h1>
+
+<form asp-controller="Cars" asp-action="AddNewCar" method="post">
+  <div class="form-group mb-forms">
+    <label asp-for="PlateNumber"></label>
+    <input type="text" class="form-control" asp-for="PlateNumber" placeholder="Plate Number">
+     <span asp-validation-for="PlateNumber" class="text-danger"></span>
+  </div>
+
+  <button type="submit" class="btn btn-success">Save</button>
+  <a type="button" class="btn btn-primary" asp-area="" asp-controller="Cars" asp-action="Index">Cancel</a>
+
+</form>

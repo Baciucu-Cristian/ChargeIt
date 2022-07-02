@@ -1,0 +1,28 @@
+﻿@model List<CarViewModel>
+
+<h1 class="display-4 mb-4">Cars overview</h1>
+
+<a type="button" class="btn btn-primary" asp-controller="Cars" asp-action="AddCar">Add Car</a>
+
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Plate Number</th>
+    </tr>
+  </thead>
+  <tbody>
+      @foreach (var chargeMachine in Model)
+      {
+          <tr>
+              <th scope="row">@chargeMachine.Id</th>
+              <td>@chargeMachine.PlateNumber</td>
+          </tr>
+      }
+    
+  </tbody>
+</table>
+
+
+
+
