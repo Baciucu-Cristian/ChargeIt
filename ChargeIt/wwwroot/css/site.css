@@ -17,10 +17,22 @@ body {
   margin-bottom: 60px;
 }
 
-.add-station-button {
+.add-button {
     margin-bottom: 15px;
 }
 
 .mb-forms {
     margin-bottom: 15px;
+}
+
+.form-label {
+    margin-bottom: 10px;
+}
+
+.form-input {
+    padding: 10px;
+}
+
+.details-label-form {
+    font-weight: bold;
 }

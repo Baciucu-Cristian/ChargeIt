@@ -1,8 +1,15 @@
 ﻿@model ChargeMachineViewModel
 
-<h1 class="display-4 mb-4">New station</h1>
+<h1 class="display-4 mb-4">Edit station</h1>
 
-<form asp-controller="ChargeMachines" asp-action="AddNewStation" method="post">
+<form asp-controller="ChargeMachines" asp-action="EditExistingStation" method="post">
+    <input type="text" class="form-control" asp-for="Id" hidden>
+
+    <div class="form-group mb-forms">
+        <label asp-for="Code" class="form-label"></label>
+        <input type="text" class="form-control form-input" asp-for="Code" disabled>
+    </div>
+
   <div class="form-group mb-forms">
     <label asp-for="City" class="form-label"></label>
     <input type="text" class="form-control form-input" asp-for="City" placeholder="City">
@@ -23,7 +30,7 @@
 
   <div class="form-group mb-forms">
     <label asp-for="Longitude" class="form-label"></label>
-    <input type="number" step="0.000001" class="form-control form-input" asp-for="Longitude" placeholder="Longitude">
+    <input type="number" step="0.000001" class="form-control" asp-for="Longitude" placeholder="Longitude">
     <span asp-validation-for="Longitude" class="text-danger"></span>
   </div>
 

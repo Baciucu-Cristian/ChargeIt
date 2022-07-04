@@ -11,12 +11,13 @@ namespace ChargeIt.Models
 		[Required]
 		public string Street { get; set; }
 		[Required]
-		public int Number { get; set; }
+		[Range(1, Int32.MaxValue)]
+		public int? Number { get; set; }
 		[Required]
 		[Range(-180, 180)]
-		public double Longitude { get; set; }
+		public double? Longitude { get; set; }
 		[Required]
 		[Range(-90, 90)]
-		public double Latitude { get; set; }
+		public double? Latitude { get; set; }
 	}
 }

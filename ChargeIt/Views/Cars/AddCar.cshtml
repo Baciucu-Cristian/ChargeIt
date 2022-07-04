@@ -4,8 +4,8 @@
 
 <form asp-controller="Cars" asp-action="AddNewCar" method="post">
   <div class="form-group mb-forms">
-    <label asp-for="PlateNumber"></label>
-    <input type="text" class="form-control" asp-for="PlateNumber" placeholder="Plate Number">
+    <label asp-for="PlateNumber" class="form-label"></label>
+    <input type="text" class="form-control form-input" asp-for="PlateNumber" placeholder="Plate Number">
      <span asp-validation-for="PlateNumber" class="text-danger"></span>
   </div>
 

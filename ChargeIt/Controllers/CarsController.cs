@@ -19,7 +19,7 @@ namespace ChargeIt.Controllers
 			var carViewModels = _applicationDbContext.Cars.Select(c => new CarViewModel
 			{
 				Id = c.Id,
-				PlateNumber = c.PlateNumber 
+				PlateNumber = c.PlateNumber
 			}).ToList();
 
 			return View(carViewModels);
@@ -43,7 +43,7 @@ namespace ChargeIt.Controllers
 			var existingCar = _applicationDbContext.Cars.FirstOrDefault(c => c.PlateNumber == carViewModel.PlateNumber);
 
 			if (existingCar != null)
-            {
+			{
 				ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
 				return View("AddCar", carViewModel);
 			}
