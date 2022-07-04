@@ -16,7 +16,7 @@ namespace ChargeIt.Controllers
 
 		public IActionResult Index()
 		{
-			var carViewModels = _applicationDbContext.Cars.Select(c => new CarViewModel
+			 var carViewModels = _applicationDbContext.Cars.Select(c => new CarViewModel
 			{
 				Id = c.Id,
 				PlateNumber = c.PlateNumber
