@@ -11,5 +11,7 @@ namespace ChargeIt.Models
         [Display(Name = "Car")]
         public int CarId { get; set; }
         public DateTime? Date { get; set; }
+        [Display(Name = "Available intervals")]
+        public int? IntervalHour { get; set; }
     }
 }

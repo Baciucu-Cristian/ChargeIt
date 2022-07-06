@@ -7,10 +7,19 @@ namespace ChargeIt.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly List<int> _totalAvailableHours;
+        private const int TotalAvailableHoursInADay = 24;
 
         public BookingsController (ApplicationDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
+
+            _totalAvailableHours = new List<int>();
+
+            for (var hour = 0; hour < TotalAvailableHoursInADay; hour++)
+            {
+                _totalAvailableHours.Add(hour);
+            }
         }
 
         public IActionResult Index()
@@ -44,6 +53,16 @@ namespace ChargeIt.Controllers
         public IActionResult AddNewBooking()
         {
             return null;
+        }
+
+        [HttpGet("Bookings/GetAvailableIntervals")]
+        public ActionResult<List<int>> GetAvailableIntervals(int chargeMachineId, DateTime date)
+        {
+            var notAvailableHours = _applicationDbContext.Bookings.Where(b => b.ChargeMachineId == chargeMachineId && b.StartTime >= date && b.StartTime <= date.AddHours(23).AddMinutes(59).AddSeconds(59)).Select(b => b.StartTime.Hour).ToList();
+
+            var availableHours = _totalAvailableHours.Except(notAvailableHours).ToList();
+
+            return availableHours;
         }
     }
 }
