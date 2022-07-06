@@ -6,13 +6,46 @@
 <h1 class="margin-bottom-40">Schedule a new Booking</h1>
 
 <form asp-controller="Bookings" asp-action="AddNewBooking" method="post">
-    <div class="form-group">
-        <label asp-for="ChargeMachineId" class="col-md-2 control-label text-white"></label>
+    <div class="form-group mb-forms">
+        <label asp-for="ChargeMachineId" class="form-label"></label>
         <div class="col-md-12">
-            <select asp-for="ChargeMachineId" asp-items="@(new SelectList(Model.ChargeMachines, "Id", "Code"))" class="form-control">
-                <option value="0">Select a recharge slot</option>
+            <select id="charge-machine-dropdown"
+                    asp-for="ChargeMachineId"
+                    asp-items="@(new SelectList(Model.ChargeMachines, nameof(ChargeMachineViewModel.Id), nameof(ChargeMachineViewModel.Code)))"
+                    class="form-control form-input">
+                <option value="0">Select a charge machine</option>
             </select>
             <span asp-validation-for="ChargeMachineId"></span>
+        </div>
+    </div>
+    
+    <div class="form-group mb-forms">
+        <label asp-for="CarId" class="form-label"></label>
+        <div class="col-md-12">
+            <select asp-for="CarId"
+                    asp-items="@(new SelectList(Model.Cars, nameof(CarViewModel.Id), nameof(CarViewModel.PlateNumber)))"
+                    class="form-control form-input">
+                <option value="0">Select a car</option>
+            </select>
+            <span asp-validation-for="CarId"></span>
+        </div>
+    </div>
+    
+    <div class="form-group mb-forms">
+        <label asp-for="Date" class="form-label"></label>
+        <input type="date" class="form-control form-input" asp-for="Date" onchange="getAvailableIntervals(this.value)">
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group mb-forms">
+        <label asp-for="CarId" class="form-label"></label>
+        <div class="col-md-12">
+            <select asp-for="CarId"
+                    asp-items="@(new SelectList(Model.Cars, nameof(CarViewModel.Id), nameof(CarViewModel.PlateNumber)))"
+                    class="form-control form-input">
+                <option value="0">Select a car</option>
+            </select>
+            <span asp-validation-for="CarId"></span>
         </div>
     </div>
 
@@ -20,3 +53,17 @@
     <a type="button" class="btn btn-primary" asp-area="" asp-controller="ChargeMachines" asp-action="Index">Cancel</a>
 
 </form>
+
+<script>
+    function getAvailableIntervals(date) {
+        var chargeMachineId = document.getElementById("charge-machine-dropdown").value;
+
+        $.ajax({
+            url: "/Bookings/GetAvailableIntervals?date=" + date + "&chargeMachineId=" + chargeMachineId,
+            type: 'get',
+            success: function(data) {
+                console.log(data);
+            }
+        });
+    }
+</script>

@@ -10,5 +10,6 @@ namespace ChargeIt.Models
         public int ChargeMachineId { get; set; }
         [Display(Name = "Car")]
         public int CarId { get; set; }
+        public DateTime? Date { get; set; }
     }
 }
