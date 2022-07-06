@@ -2,6 +2,7 @@
 using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChargeIt.Controllers
 {
@@ -126,18 +127,37 @@ namespace ChargeIt.Controllers
 				return RedirectToAction("Index");
 			}
 
-			var chargeMachineViewModel = new ChargeMachineViewModel()
-			{
-				Id = existingChargeMachine.Id,
-				City = existingChargeMachine.City,
-				Code = existingChargeMachine.Code,
-				Latitude = existingChargeMachine.Latitude,
-				Longitude = existingChargeMachine.Longitude,
-				Number = existingChargeMachine.Number,
-				Street = existingChargeMachine.Street
+			var availableBookings = _applicationDbContext.Bookings
+				.Include(b => b.Car)
+				.Where(b => b.ChargeMachineId == existingChargeMachine.Id)
+				.OrderByDescending(b => b.StartTime)
+				.ToList();
+
+			var stationDetailsViewModel = new StationDetailsViewModel() {
+				ChargeMachine = new ChargeMachineViewModel()
+				{
+					Id = existingChargeMachine.Id,
+					City = existingChargeMachine.City,
+					Code = existingChargeMachine.Code,
+					Latitude = existingChargeMachine.Latitude,
+					Longitude = existingChargeMachine.Longitude,
+					Number = existingChargeMachine.Number,
+					Street = existingChargeMachine.Street
+				},
+				Bookings = availableBookings.Select(ab => new BookingViewModel
+                {
+					Id = ab.Id,
+					Code = ab.Code,
+					StartTime = ab.StartTime,
+					Car = new CarViewModel
+                    {
+						Id = ab.Car.Id,
+						PlateNumber = ab.Car.PlateNumber
+                    }
+                }).ToList()
 			};
 
-			return View(chargeMachineViewModel);
+			return View(stationDetailsViewModel);
 		}
 	}
 }
