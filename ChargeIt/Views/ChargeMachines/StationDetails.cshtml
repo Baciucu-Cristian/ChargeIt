@@ -1,6 +1,6 @@
 ﻿@model ChargeMachineViewModel
 
-<h1 class="display-4 mb-4">Machine code: @Model.Code</h1>
+<h1 class="margin-bottom-40">Machine code: @Model.Code</h1>
 
 <div class="card" style="width: 30rem;">
   <img class="card-img-top" src="https://astros.in/wp-content/uploads/2018/10/electrifyamericachargersbybtcpower1.jpg" alt="Station">
@@ -12,22 +12,22 @@
     </div>
 
     <div>
-         <label asp-for="Street"></label>
+         <label asp-for="Street" class="details-label-form"></label>
          <span> @Model.Street </span>
      </div>
 
      <div>
-         <label asp-for="Number"></label>
+         <label asp-for="Number" class="details-label-form"></label>
         <span> @Model.Number </span>
     </div>
 
     <div>
-        <label asp-for="Latitude"></label>
+        <label asp-for="Latitude" class="details-label-form"></label>
         <span> @Model.Latitude </span>
     </div>
 
     <div>
-        <label asp-for="Longitude"></label>
+        <label asp-for="Longitude" class="details-label-form"></label>
         <span> @Model.Longitude </span>
     </div>
   </div>

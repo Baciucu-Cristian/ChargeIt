@@ -21,6 +21,14 @@ body {
     margin-bottom: 15px;
 }
 
+.margin-bottom-40 {
+    margin-bottom: 20px;
+}
+
+.margin-right-auto {
+    margin-right: auto;
+}
+
 .mb-forms {
     margin-bottom: 15px;
 }
@@ -35,4 +43,9 @@ body {
 
 .details-label-form {
     font-weight: bold;
+}
+
+.icon-button {
+    color: white;
+    margin-right: 5px;
 }

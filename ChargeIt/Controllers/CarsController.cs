@@ -57,5 +57,65 @@ namespace ChargeIt.Controllers
 
 			return RedirectToAction("Index");
 		}
+
+        public IActionResult EditCar(int id)
+        {
+            var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == id);
+
+            if (existingCar == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var carViewModel = new CarViewModel
+            {
+                Id = existingCar.Id,
+                PlateNumber = existingCar.PlateNumber,
+            };
+
+            return View(carViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult EditExistingCar(CarViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("EditCar", model);
+            }
+
+            var plateNumberAvailable = _applicationDbContext.Cars.Any(c => c.PlateNumber == model.PlateNumber &&
+                                                                                        c.Id != model.Id);
+
+            if (plateNumberAvailable)
+            {
+                ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
+                return View("EditCar", model);
+            }
+
+			var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == model.Id);
+
+            if (existingCar != null)
+            {
+                existingCar.PlateNumber = model.PlateNumber;
+
+                _applicationDbContext.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+		public IActionResult DeleteCar(int id)
+        {
+            var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == id);
+
+            if (existingCar != null)
+            {
+                _applicationDbContext.Cars.Remove(existingCar);
+                _applicationDbContext.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
 	}
 }

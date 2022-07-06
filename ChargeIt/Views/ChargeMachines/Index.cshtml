@@ -1,56 +1,71 @@
 ﻿@model List<ChargeMachineViewModel>
 
-<h1 class="display-4 mb-4">Charge machines overview</h1>
+<div class="d-flex align-items-center">
+    <h1 class="margin-bottom-40 margin-right-auto">Charge machines overview</h1>
 
-<a type="button" class="btn btn-primary add-button" asp-controller="ChargeMachines" asp-action="AddStation">Add Station</a>
+    <a type="button" class="btn btn-primary add-button" asp-controller="ChargeMachines" asp-action="AddStation">
+        <i class="fas fa-plus icon-button"></i>
+        <span>Add station</span>
+    </a>
+</div>
 
 <table class="table table-striped table-hover">
-  <thead>
-    <tr>
-      <th scope="col">Id</th>
-      <th scope="col">Code</th>
-      <th scope="col">City</th>
-      <th scope="col">Street</th>
-      <th scope="col">Number</th>
-      <th scope="col">Longitude</th>
-      <th scope="col">Latitude</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-      @foreach (var chargeMachine in Model)
-      {
-          <tr>
-              <th scope="row">@chargeMachine.Id</th>
-              <td>@chargeMachine.Code</td>
-              <td>@chargeMachine.City</td>
-              <td>@chargeMachine.Street</td>
-              <td>@chargeMachine.Number</td>
-              <td>@chargeMachine.Longitude</td>
-              <td>@chargeMachine.Latitude</td>
-              <td>
-                  <a type="button" 
-                     class="btn btn-primary"
-                     asp-controller="ChargeMachines"
-                     asp-action="StationDetails"
-                     asp-route-id="@chargeMachine.Id">Details</a>
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Code</th>
+            <th scope="col">City</th>
+            <th scope="col">Street</th>
+            <th scope="col">Number</th>
+            <th scope="col">Longitude</th>
+            <th scope="col">Latitude</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var chargeMachine in Model)
+        {
+            var index = Model.IndexOf(chargeMachine) + 1;
+            <tr>
+                <th>@index</th>
+                <td>@chargeMachine.Code</td>
+                <td>@chargeMachine.City</td>
+                <td>@chargeMachine.Street</td>
+                <td>@chargeMachine.Number</td>
+                <td>@chargeMachine.Longitude</td>
+                <td>@chargeMachine.Latitude</td>
+                <td>
+                    <a type="button"
+                   class="btn btn-primary"
+                   asp-controller="ChargeMachines"
+                   asp-action="StationDetails"
+                   asp-route-id="@chargeMachine.Id">
+                        <i class="fa fa-info-circle icon-button"></i>
+                        <span>Details</span>
+                    </a>
 
-                  <a type="button" 
-                     class="btn btn-success"
-                     asp-controller="ChargeMachines"
-                     asp-action="EditStation"
-                     asp-route-id="@chargeMachine.Id">Edit</a>
+                    <a type="button"
+                   class="btn btn-success"
+                   asp-controller="ChargeMachines"
+                   asp-action="EditStation"
+                   asp-route-id="@chargeMachine.Id">
+                        <i class="fas fa-edit icon-button"></i>
+                        <span>Edit</span>
+                    </a>
 
-                  <a type="button" 
-                     class="btn btn-danger"
-                     asp-controller="ChargeMachines"
-                     asp-action="DeleteStation"
-                     asp-route-id="@chargeMachine.Id">Delete</a>
-              </td>
-          </tr>
-      }
-    
-  </tbody>
+                    <a type="button"
+                   class="btn btn-danger"
+                   asp-controller="ChargeMachines"
+                   asp-action="DeleteStation"
+                   asp-route-id="@chargeMachine.Id">
+                        <i class="fa fa-trash icon-button"></i>
+                        <span>Delete</span>
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
 </table>
 
 
