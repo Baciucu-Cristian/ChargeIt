@@ -10,12 +10,12 @@
         <label asp-for="ChargeMachineId" class="form-label"></label>
         <div class="col-md-12">
             <select id="charge-machine-dropdown"
-                    asp-for="ChargeMachineId"
-                    asp-items="@(new SelectList(Model.ChargeMachines, nameof(ChargeMachineViewModel.Id), nameof(ChargeMachineViewModel.Code)))"
+                    asp-for="ChargeMachineId" onchange="getAvailableIntervals()"
+                    asp-items="@(new SelectList(Model.ChargeMachines, nameof(DropDownViewModel.Id), nameof(DropDownViewModel.Value)))"
                     class="form-control form-input">
-                <option value="0">Select a charge machine</option>
+                <option value="">Select a charge machine</option>
             </select>
-            <span asp-validation-for="ChargeMachineId"></span>
+            <span asp-validation-for="ChargeMachineId" class="text-danger"></span>
         </div>
     </div>
     
@@ -23,17 +23,17 @@
         <label asp-for="CarId" class="form-label"></label>
         <div class="col-md-12">
             <select asp-for="CarId"
-                    asp-items="@(new SelectList(Model.Cars, nameof(CarViewModel.Id), nameof(CarViewModel.PlateNumber)))"
+                    asp-items="@(new SelectList(Model.Cars, nameof(DropDownViewModel.Id), nameof(DropDownViewModel.Value)))"
                     class="form-control form-input">
-                <option value="0">Select a car</option>
+                <option value="">Select a car</option>
             </select>
-            <span asp-validation-for="CarId"></span>
+            <span asp-validation-for="CarId" class="text-danger"></span>
         </div>
     </div>
     
     <div class="form-group mb-forms">
         <label asp-for="Date" class="form-label"></label>
-        <input type="date" class="form-control form-input" asp-for="Date" onchange="getAvailableIntervals(this.value)">
+        <input type="date" id="date-dropdown" class="form-control form-input" asp-for="Date" min="@DateTime.Now.Date.ToString("yyyy-MM-dd")" onchange="getAvailableIntervals()">
         <span asp-validation-for="Date" class="text-danger"></span>
     </div>
     
@@ -41,20 +41,30 @@
         <label asp-for="IntervalHour" class="form-label"></label>
         <div class="col-md-12">
             <select id="available-intervals-dropdown" asp-for="IntervalHour" class="form-control form-input">
-                <option value="-1">Select an available interval slot</option>
+                <option value="">Select an available interval slot</option>
             </select>
-            <span asp-validation-for="IntervalHour"></span>
+            <span asp-validation-for="IntervalHour" class="text-danger"></span>
         </div>
     </div>
 
     <button type="submit" class="btn btn-success">Save</button>
-    <a type="button" class="btn btn-primary" asp-area="" asp-controller="ChargeMachines" asp-action="Index">Cancel</a>
 
 </form>
 
-<script>
-    function getAvailableIntervals(date) {
+<script  type="text/javascript">
+    $(document).ready(function() {
+        getAvailableIntervals(); 
+    });
+
+    function getAvailableIntervals() {
         var chargeMachineId = document.getElementById("charge-machine-dropdown").value;
+        var date = document.getElementById("date-dropdown").value;
+
+        console.log(chargeMachineId);
+
+        if (chargeMachineId === "" || date === "") {
+            return;
+        }
 
         $.ajax({
             url: "/Bookings/GetAvailableIntervals?date=" + date + "&chargeMachineId=" + chargeMachineId,
@@ -64,7 +74,7 @@
                 availableIntervalsDropdown.innerHTML = "";
 
                 var defaultOption = document.createElement("option");
-                defaultOption.value = -1;
+                defaultOption.value = "";
                 defaultOption.innerText = "Select an available interval slot";
 
                 availableIntervalsDropdown.appendChild(defaultOption);
@@ -72,11 +82,15 @@
                 for (var i = 0; i < data.length; i++) {
                     var option = document.createElement("option");
                     option.value = data[i];
-                    option.innerText = data[i];
+                    option.innerText = get24FormattedHour(data[i]) + " - " + get24FormattedHour(data[i] + 1);
 
                     availableIntervalsDropdown.appendChild(option);
                 }
             }
         });
+    }
+
+    function get24FormattedHour(hour) {
+        return hour < 10 ? "0" + hour + " : 00"  : hour + " : 00";
     }
 </script>

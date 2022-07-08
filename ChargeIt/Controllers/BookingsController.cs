@@ -1,4 +1,5 @@
 ﻿using ChargeIt.Data;
+using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,21 +25,16 @@ namespace ChargeIt.Controllers
 
         public IActionResult Index()
         {
-            var chargeMachineViewModels = _applicationDbContext.ChargeMachines.Select(cm => new ChargeMachineViewModel
+            var chargeMachineViewModels = _applicationDbContext.ChargeMachines.Select(cm => new DropDownViewModel
             {
                 Id = cm.Id,
-                City = cm.City,
-                Code = cm.Code,
-                Latitude = cm.Latitude,
-                Longitude = cm.Longitude,
-                Number = cm.Number,
-                Street = cm.Street
+                Value = $"{cm.Code}, {cm.City}, {cm.Street}, {cm.Number}"
             }).ToList();
 
-            var carViewModels = _applicationDbContext.Cars.Select(c => new CarViewModel
+            var carViewModels = _applicationDbContext.Cars.Select(c => new DropDownViewModel
             {
                 Id = c.Id,
-                PlateNumber = c.PlateNumber
+                Value = c.PlateNumber
             }).ToList();
 
             var bookingsViewModel = new BookingsViewModel()
@@ -50,9 +46,61 @@ namespace ChargeIt.Controllers
             return View(bookingsViewModel);
         }
 
-        public IActionResult AddNewBooking()
+        public IActionResult AddNewBooking(BookingsViewModel bookingsViewModel)
         {
-            return null;
+            if (ModelState.IsValid)
+            {
+                var startTime = bookingsViewModel.Date.Value.AddHours(bookingsViewModel.IntervalHour.Value);
+                var endTime = startTime.AddMinutes(59).AddSeconds(59);
+
+                if (_applicationDbContext.Bookings.FirstOrDefault(b => b.ChargeMachineId == bookingsViewModel.ChargeMachineId && b.StartTime == startTime) != null)
+                {
+                    ModelState.AddModelError(nameof(BookingsViewModel.IntervalHour), "There is an already allocated interval for the selected machine for the selected interval");
+                }
+
+                if (_applicationDbContext.Bookings.FirstOrDefault(b => b.CarId == bookingsViewModel.CarId && b.StartTime == startTime) != null)
+                {
+                    ModelState.AddModelError(nameof(BookingsViewModel.IntervalHour), "This car has been already allocated to the selected interval on a different charge machine");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var booking = new BookingDbModel()
+                    {
+                        ChargeMachineId = bookingsViewModel.ChargeMachineId.Value,
+                        CarId = bookingsViewModel.CarId.Value,
+                        StartTime = startTime,
+                        EndTime = endTime,
+                        Code = Guid.NewGuid()
+                    };
+
+                    _applicationDbContext.Bookings.Add(booking);
+                    _applicationDbContext.SaveChanges();
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var chargeMachineViewModels = _applicationDbContext.ChargeMachines.Select(cm => new DropDownViewModel
+                {
+                    Id = cm.Id,
+                    Value = $"{cm.Code}, {cm.City}, {cm.Street}, {cm.Number}"
+                }).ToList();
+
+                var carViewModels = _applicationDbContext.Cars.Select(c => new DropDownViewModel
+                {
+                    Id = c.Id,
+                    Value = c.PlateNumber
+                }).ToList();
+
+                bookingsViewModel.ChargeMachines = chargeMachineViewModels;
+                bookingsViewModel.Cars = carViewModels;
+                bookingsViewModel.IntervalHour = null;
+
+                return View("Index", bookingsViewModel);
+            }
+
+            return RedirectToAction("Index");
         }
 
         [HttpGet("Bookings/GetAvailableIntervals")]

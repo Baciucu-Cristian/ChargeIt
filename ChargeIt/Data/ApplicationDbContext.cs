@@ -14,5 +14,6 @@ namespace ChargeIt.Data
 		public DbSet<CarDbModel> Cars { get; set; }
 		public DbSet<ChargeMachineDbModel> ChargeMachines { get; set; }
 		public DbSet<BookingDbModel> Bookings { get; set; }
+		public DbSet<CarOwnerDbModel> CarOwners { get; set; }
 	}
 }

@@ -4,14 +4,18 @@ namespace ChargeIt.Models
 {
     public class BookingsViewModel
     {
-        public List<ChargeMachineViewModel> ChargeMachines { get; set; }
-        public List<CarViewModel> Cars { get; set; }
+        public List<DropDownViewModel> ChargeMachines { get; set; }
+        public List<DropDownViewModel> Cars { get; set; }
         [Display(Name = "Charge Machine")]
-        public int ChargeMachineId { get; set; }
+        [Required(ErrorMessage = "Please select a valid charge machine")]
+        public int? ChargeMachineId { get; set; }
         [Display(Name = "Car")]
-        public int CarId { get; set; }
+        [Required(ErrorMessage = "Please select a valid car")]
+        public int? CarId { get; set; }
+        [Required]
         public DateTime? Date { get; set; }
         [Display(Name = "Available intervals")]
+        [Required(ErrorMessage = "Please select a valid interval")]
         public int? IntervalHour { get; set; }
     }
 }
