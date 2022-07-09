@@ -12,6 +12,7 @@
     <thead>
         <tr>
             <th>#</th>
+            <th>Owner</th>
             <th>Plate Number</th>
             <th>Actions</th>
         </tr>
@@ -22,6 +23,7 @@
             var index = Model.IndexOf(car) + 1;
             <tr>
                 <th>@index</th>
+                <td>@car.CarOwner</td>
                 <td>@car.PlateNumber</td>
                 <td>
                     <a type="button"

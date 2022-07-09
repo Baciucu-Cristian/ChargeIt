@@ -2,6 +2,7 @@
 using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChargeIt.Controllers
 {
@@ -31,10 +32,10 @@ namespace ChargeIt.Controllers
                 Value = $"{cm.Code}, {cm.City}, {cm.Street}, {cm.Number}"
             }).ToList();
 
-            var carViewModels = _applicationDbContext.Cars.Select(c => new DropDownViewModel
+            var carViewModels = _applicationDbContext.Cars.Include(c => c.Owner).Select(c => new DropDownViewModel
             {
                 Id = c.Id,
-                Value = c.PlateNumber
+                Value = $"{c.PlateNumber}, {c.Owner.Name} - {c.Owner.Email}"
             }).ToList();
 
             var bookingsViewModel = new BookingsViewModel()
@@ -87,10 +88,10 @@ namespace ChargeIt.Controllers
                     Value = $"{cm.Code}, {cm.City}, {cm.Street}, {cm.Number}"
                 }).ToList();
 
-                var carViewModels = _applicationDbContext.Cars.Select(c => new DropDownViewModel
+                var carViewModels = _applicationDbContext.Cars.Include(c => c.Owner).Select(c => new DropDownViewModel
                 {
                     Id = c.Id,
-                    Value = c.PlateNumber
+                    Value = $"{c.PlateNumber}, {c.Owner.Name} - {c.Owner.Email}"
                 }).ToList();
 
                 bookingsViewModel.ChargeMachines = chargeMachineViewModels;

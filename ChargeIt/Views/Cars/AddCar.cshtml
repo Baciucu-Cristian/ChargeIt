@@ -3,6 +3,19 @@
 <h1 class="margin-bottom-40">New car</h1>
 
 <form asp-controller="Cars" asp-action="AddNewCar" method="post">
+    <div class="form-group mb-forms">
+        <label asp-for="CarOwnerId" class="form-label"></label>
+        <div class="col-md-12">
+            <select id="charge-machine-dropdown"
+                    asp-for="CarOwnerId"
+                    asp-items="@(new SelectList(Model.CarOwners, nameof(DropDownViewModel.Id), nameof(DropDownViewModel.Value)))"
+                    class="form-control form-input">
+                <option value="">Select a car owner</option>
+            </select>
+            <span asp-validation-for="CarOwnerId" class="text-danger"></span>
+        </div>
+    </div>
+
   <div class="form-group mb-forms">
     <label asp-for="PlateNumber" class="form-label"></label>
     <input type="text" class="form-control form-input" asp-for="PlateNumber" placeholder="Plate Number">

@@ -17,18 +17,28 @@ namespace ChargeIt.Controllers
 
 		public IActionResult Index()
 		{
-			 var carViewModels = _applicationDbContext.Cars.Select(c => new CarViewModel
+			 var carViewModels = _applicationDbContext.Cars.Include(c => c.Owner).Select(c => new CarViewModel
 			{
 				Id = c.Id,
-				PlateNumber = c.PlateNumber
-			}).ToList();
+				PlateNumber = c.PlateNumber,
+				CarOwner = $"{c.Owner.Name} {c.Owner.Email}"
+			 }).ToList();
 
 			return View(carViewModels);
 		}
 
 		public IActionResult AddCar()
 		{
-			var carViewModel = new CarViewModel();
+			var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+			{
+				Id = co.Id,
+				Value = $"{co.Name} {co.Email}"
+			}).ToList();
+
+			var carViewModel = new CarViewModel()
+            {
+				CarOwners = carOwnerViewModels
+            };
 
 			return View(carViewModel);
 		}
@@ -38,6 +48,14 @@ namespace ChargeIt.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
+				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+				{
+					Id = co.Id,
+					Value = $"{co.Name} {co.Email}"
+				}).ToList();
+
+				carViewModel.CarOwners = carOwnerViewModels;
+
 				return View("AddCar", carViewModel);
 			}
 
@@ -46,12 +64,22 @@ namespace ChargeIt.Controllers
 			if (existingCar != null)
 			{
 				ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
+
+				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+				{
+					Id = co.Id,
+					Value = $"{co.Name} {co.Email}"
+				}).ToList();
+
+				carViewModel.CarOwners = carOwnerViewModels;
+
 				return View("AddCar", carViewModel);
 			}
 
 			_applicationDbContext.Cars.Add(new CarDbModel
 			{
 				PlateNumber = carViewModel.PlateNumber,
+				OwnerId = carViewModel.CarOwnerId
 			});
 
 			_applicationDbContext.SaveChanges();
@@ -68,10 +96,18 @@ namespace ChargeIt.Controllers
                 return RedirectToAction("Index");
             }
 
-            var carViewModel = new CarViewModel
+			var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+			{
+				Id = co.Id,
+				Value = $"{co.Name} {co.Email}"
+			}).ToList();
+
+			var carViewModel = new CarViewModel
             {
                 Id = existingCar.Id,
                 PlateNumber = existingCar.PlateNumber,
+				CarOwnerId = existingCar.OwnerId,
+				CarOwners = carOwnerViewModels
             };
 
             return View(carViewModel);
@@ -82,7 +118,15 @@ namespace ChargeIt.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View("EditCar", model);
+				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+				{
+					Id = co.Id,
+					Value = $"{co.Name} {co.Email}"
+				}).ToList();
+
+				model.CarOwners = carOwnerViewModels;
+
+				return View("EditCar", model);
             }
 
             var plateNumberAvailable = _applicationDbContext.Cars.Any(c => c.PlateNumber == model.PlateNumber &&
@@ -91,7 +135,16 @@ namespace ChargeIt.Controllers
             if (plateNumberAvailable)
             {
                 ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
-                return View("EditCar", model);
+
+				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+				{
+					Id = co.Id,
+					Value = $"{co.Name} {co.Email}"
+				}).ToList();
+
+				model.CarOwners = carOwnerViewModels;
+
+				return View("EditCar", model);
             }
 
 			var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == model.Id);
@@ -99,6 +152,7 @@ namespace ChargeIt.Controllers
             if (existingCar != null)
             {
                 existingCar.PlateNumber = model.PlateNumber;
+				existingCar.OwnerId = model.CarOwnerId;
 
                 _applicationDbContext.SaveChanges();
             }
@@ -121,7 +175,7 @@ namespace ChargeIt.Controllers
 
 		public IActionResult CarDetails(int id)
 		{
-			var existingCar = _applicationDbContext.Cars.FirstOrDefault(c => c.Id == id);
+			var existingCar = _applicationDbContext.Cars.Include(c => c.Owner).FirstOrDefault(c => c.Id == id);
 
 			if (existingCar == null)
 			{
@@ -139,7 +193,8 @@ namespace ChargeIt.Controllers
 				Car = new CarViewModel()
 				{
 					Id = existingCar.Id,
-					PlateNumber = existingCar.PlateNumber
+					PlateNumber = existingCar.PlateNumber,
+					CarOwner = $"{existingCar.Owner.Name} {existingCar.Owner.Email}"
 				},
 				Bookings = availableBookings.Select(ab => new BookingViewModel
 				{

@@ -1,6 +1,17 @@
 ﻿@model CarDetailsViewModel
 
-<h1 class="margin-bottom-40">Car plate number: @Model.Car.PlateNumber</h1>
+<h1 class="margin-bottom-40">Car details for: @Model.Car.PlateNumber</h1>
+
+<div class="card" style="width: 30rem;">
+  <img class="card-img-top" src="https://astros.in/wp-content/uploads/2018/10/electrifyamericachargersbybtcpower1.jpg" alt="Car">
+  <div class="card-body">
+    <h5 class="card-title">@Model.Car.PlateNumber</h5>
+    <div>
+         <label asp-for="Car.CarOwner" class="details-label-form"></label>
+         <span> @Model.Car.CarOwner </span>
+    </div>
+  </div>
+</div>
 
 <h1 class="margin-bottom-40 margin-top-40">Bookings history</h1>
 
