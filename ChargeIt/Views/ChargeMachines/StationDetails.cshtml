@@ -42,6 +42,7 @@
             <th scope="col">Code</th>
             <th scope="col">Start date</th>
             <th scope="col">Car plate number</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -53,6 +54,21 @@
                 <td>@booking.Code</td>
                 <td>@booking.StartTime.ToString("g")</td>
                 <td>@booking.Car.PlateNumber</td>
+                <td>
+                     @if(booking.StartTime >= DateTime.Now)
+                     {
+                         <a type="button"
+                           class="btn btn-danger"
+                           asp-controller="Bookings"
+                           asp-action="DeleteBooking"
+                           asp-route-id="@booking.Id"
+                           asp-route-entityId="@Model.ChargeMachine.Id"
+                           asp-route-sourceAction="StationDetails">
+                            <i class="fa fa-trash icon-button"></i>
+                            <span>Remove</span>
+                        </a>
+                     }
+                </td>
             </tr>
         }
 

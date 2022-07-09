@@ -113,5 +113,26 @@ namespace ChargeIt.Controllers
 
             return availableHours;
         }
+
+        [HttpGet("Bookings/DeleteBooking/{id}/{entityId}/{sourceAction}")]
+        public IActionResult DeleteBooking(int id, int entityId, string sourceAction)
+        {
+            var existingBooking = _applicationDbContext.Bookings.FirstOrDefault(b => b.Id == id);
+
+            if (existingBooking != null && existingBooking.StartTime >= DateTime.Now)
+            {
+                _applicationDbContext.Bookings.Remove(existingBooking);
+                _applicationDbContext.SaveChanges();
+            }
+
+            if (sourceAction == "CarDetails")
+            {
+                return RedirectToAction("CarDetails", "Cars", new { id = entityId});
+            }
+            else
+            {
+                return RedirectToAction("StationDetails", "ChargeMachines", new { id = entityId });
+            }    
+        }
     }
 }
