@@ -1,0 +1,63 @@
+﻿@model List<CarOwnerViewModel>
+
+<div class="d-flex align-items-center">
+    <h1 class="margin-bottom-40 margin-right-auto">Car owners overview</h1>
+    <a type="button" class="btn btn-primary add-button" asp-controller="CarOwners" asp-action="AddCarOwner">
+        <i class="fas fa-plus icon-button"></i>
+        <span>Add Car Owner</span>
+    </a>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var carOwner in Model)
+        {
+            var index = Model.IndexOf(carOwner) + 1;
+            <tr>
+                <th>@index</th>
+                <td>@carOwner.Name</td>
+                <td>@carOwner.Email</td>
+                <td>
+                    <a type="button"
+                       class="btn btn-primary"
+                       asp-controller="CarOwners"
+                       asp-action="CarOwnerDetails"
+                       asp-route-id="@carOwner.Id">
+                        <i class="fa fa-info-circle icon-button"></i>
+                        <span>Details</span>
+                    </a>
+                    <a type="button"
+                       class="btn btn-success"
+                       asp-controller="CarOwners"
+                       asp-action="EditCarOwner"
+                       asp-route-id="@carOwner.Id">
+                        <i class="fas fa-edit icon-button"></i>
+                        <span>Edit</span>
+                    </a>
+
+                    <a type="button"
+                       class="btn btn-danger"
+                       asp-controller="CarOwners"
+                       asp-action="DeleteCarOwner"
+                       asp-route-id="@carOwner.Id">
+                        <i class="fa fa-trash icon-button"></i>
+                        <span>Remove</span>
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+
+
+
