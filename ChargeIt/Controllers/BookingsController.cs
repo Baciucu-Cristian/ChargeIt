@@ -1,18 +1,22 @@
 ﻿using ChargeIt.Data;
 using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Net.Mail;
 
 namespace ChargeIt.Controllers
 {
+    [Authorize]
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly List<int> _totalAvailableHours;
         private const int TotalAvailableHoursInADay = 24;
 
-        public BookingsController (ApplicationDbContext applicationDbContext)
+        public BookingsController(ApplicationDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
 
@@ -77,6 +81,8 @@ namespace ChargeIt.Controllers
 
                     _applicationDbContext.Bookings.Add(booking);
                     _applicationDbContext.SaveChanges();
+
+                    SendEmailToTheUser(booking.Id);
                 }
             }
 
@@ -104,6 +110,33 @@ namespace ChargeIt.Controllers
             return RedirectToAction("Index");
         }
 
+        private void SendEmailToTheUser(int bookingId)
+        {
+            var booking = _applicationDbContext.Bookings
+                .Include(b => b.ChargeMachine)
+                .Include(b => b.Car)
+                .ThenInclude(c => c.Owner)
+                .FirstOrDefault(b => b.Id == bookingId);
+
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("chargeitnetrom@gmail.com", "1234QAZ."),
+                EnableSsl = true,
+            };
+
+            var emailBody = @$"<h3>A new order has been created for your car : {booking.Car.PlateNumber}</h3>
+                <p><b>Order number:</b>{booking.Code}</p>
+                <p><b>Interval:</b>{booking.StartTime.ToString("yyyy-MM-dd HH:MM")} - {booking.EndTime.ToString("yyyy-MM-dd HH:MM")}</p>
+                <p><b>Charge machine code:</b>{booking.ChargeMachine.Code}</p>
+                <p><b>City:</b>{booking.ChargeMachine.City}</p>
+                <p><b>Street:</b>{booking.ChargeMachine.Street}</p>
+                <p><b>Number:</b>{booking.ChargeMachine.Number}</p>
+            ";
+
+            smtpClient.Send("chargeitnetrom@gmail.com", "baciucucristianiulian@yahoo.com", "New booking was created for you", emailBody);
+        }
+
         [HttpGet("Bookings/GetAvailableIntervals")]
         public ActionResult<List<int>> GetAvailableIntervals(int chargeMachineId, DateTime date)
         {
@@ -127,12 +160,12 @@ namespace ChargeIt.Controllers
 
             if (sourceAction == "CarDetails")
             {
-                return RedirectToAction("CarDetails", "Cars", new { id = entityId});
+                return RedirectToAction("CarDetails", "Cars", new { id = entityId });
             }
             else
             {
                 return RedirectToAction("StationDetails", "ChargeMachines", new { id = entityId });
-            }    
+            }
         }
     }
 }

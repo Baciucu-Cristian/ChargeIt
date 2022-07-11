@@ -1,91 +1,93 @@
 ﻿using ChargeIt.Data;
 using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeIt.Controllers
 {
-	public class CarsController : Controller
-	{
-		private readonly ApplicationDbContext _applicationDbContext;
+    [Authorize]
+    public class CarsController : Controller
+    {
+        private readonly ApplicationDbContext _applicationDbContext;
 
-		public CarsController(ApplicationDbContext applicationDbContext)
-		{
-			_applicationDbContext = applicationDbContext;
-		}
+        public CarsController(ApplicationDbContext applicationDbContext)
+        {
+            _applicationDbContext = applicationDbContext;
+        }
 
-		public IActionResult Index()
-		{
-			 var carViewModels = _applicationDbContext.Cars.Include(c => c.Owner).Select(c => new CarViewModel
-			{
-				Id = c.Id,
-				PlateNumber = c.PlateNumber,
-				CarOwner = $"{c.Owner.Name} {c.Owner.Email}"
-			 }).ToList();
-
-			return View(carViewModels);
-		}
-
-		public IActionResult AddCar()
-		{
-			var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-			{
-				Id = co.Id,
-				Value = $"{co.Name} {co.Email}"
-			}).ToList();
-
-			var carViewModel = new CarViewModel()
+        public IActionResult Index()
+        {
+            var carViewModels = _applicationDbContext.Cars.Include(c => c.Owner).Select(c => new CarViewModel
             {
-				CarOwners = carOwnerViewModels
+                Id = c.Id,
+                PlateNumber = c.PlateNumber,
+                CarOwner = $"{c.Owner.Name} {c.Owner.Email}"
+            }).ToList();
+
+            return View(carViewModels);
+        }
+
+        public IActionResult AddCar()
+        {
+            var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+            {
+                Id = co.Id,
+                Value = $"{co.Name} {co.Email}"
+            }).ToList();
+
+            var carViewModel = new CarViewModel()
+            {
+                CarOwners = carOwnerViewModels
             };
 
-			return View(carViewModel);
-		}
+            return View(carViewModel);
+        }
 
-		[HttpPost]
-		public IActionResult AddNewCar(CarViewModel carViewModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-				{
-					Id = co.Id,
-					Value = $"{co.Name} {co.Email}"
-				}).ToList();
+        [HttpPost]
+        public IActionResult AddNewCar(CarViewModel carViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+                {
+                    Id = co.Id,
+                    Value = $"{co.Name} {co.Email}"
+                }).ToList();
 
-				carViewModel.CarOwners = carOwnerViewModels;
+                carViewModel.CarOwners = carOwnerViewModels;
 
-				return View("AddCar", carViewModel);
-			}
+                return View("AddCar", carViewModel);
+            }
 
-			var existingCar = _applicationDbContext.Cars.FirstOrDefault(c => c.PlateNumber == carViewModel.PlateNumber);
+            var existingCar = _applicationDbContext.Cars.FirstOrDefault(c => c.PlateNumber == carViewModel.PlateNumber);
 
-			if (existingCar != null)
-			{
-				ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
+            if (existingCar != null)
+            {
+                ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
 
-				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-				{
-					Id = co.Id,
-					Value = $"{co.Name} {co.Email}"
-				}).ToList();
+                var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+                {
+                    Id = co.Id,
+                    Value = $"{co.Name} {co.Email}"
+                }).ToList();
 
-				carViewModel.CarOwners = carOwnerViewModels;
+                carViewModel.CarOwners = carOwnerViewModels;
 
-				return View("AddCar", carViewModel);
-			}
+                return View("AddCar", carViewModel);
+            }
 
-			_applicationDbContext.Cars.Add(new CarDbModel
-			{
-				PlateNumber = carViewModel.PlateNumber,
-				OwnerId = carViewModel.CarOwnerId
-			});
+            _applicationDbContext.Cars.Add(new CarDbModel
+            {
+                PlateNumber = carViewModel.PlateNumber,
+                OwnerId = carViewModel.CarOwnerId
+            });
 
-			_applicationDbContext.SaveChanges();
+            _applicationDbContext.SaveChanges();
 
-			return RedirectToAction("Index");
-		}
+            return RedirectToAction("Index");
+        }
 
         public IActionResult EditCar(int id)
         {
@@ -96,18 +98,18 @@ namespace ChargeIt.Controllers
                 return RedirectToAction("Index");
             }
 
-			var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-			{
-				Id = co.Id,
-				Value = $"{co.Name} {co.Email}"
-			}).ToList();
+            var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+            {
+                Id = co.Id,
+                Value = $"{co.Name} {co.Email}"
+            }).ToList();
 
-			var carViewModel = new CarViewModel
+            var carViewModel = new CarViewModel
             {
                 Id = existingCar.Id,
                 PlateNumber = existingCar.PlateNumber,
-				CarOwnerId = existingCar.OwnerId,
-				CarOwners = carOwnerViewModels
+                CarOwnerId = existingCar.OwnerId,
+                CarOwners = carOwnerViewModels
             };
 
             return View(carViewModel);
@@ -118,15 +120,15 @@ namespace ChargeIt.Controllers
         {
             if (!ModelState.IsValid)
             {
-				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-				{
-					Id = co.Id,
-					Value = $"{co.Name} {co.Email}"
-				}).ToList();
+                var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+                {
+                    Id = co.Id,
+                    Value = $"{co.Name} {co.Email}"
+                }).ToList();
 
-				model.CarOwners = carOwnerViewModels;
+                model.CarOwners = carOwnerViewModels;
 
-				return View("EditCar", model);
+                return View("EditCar", model);
             }
 
             var plateNumberAvailable = _applicationDbContext.Cars.Any(c => c.PlateNumber == model.PlateNumber &&
@@ -136,23 +138,23 @@ namespace ChargeIt.Controllers
             {
                 ModelState.AddModelError("PlateNumber", "There is an already existing car with the same plate number");
 
-				var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
-				{
-					Id = co.Id,
-					Value = $"{co.Name} {co.Email}"
-				}).ToList();
+                var carOwnerViewModels = _applicationDbContext.CarOwners.Select(co => new DropDownViewModel
+                {
+                    Id = co.Id,
+                    Value = $"{co.Name} {co.Email}"
+                }).ToList();
 
-				model.CarOwners = carOwnerViewModels;
+                model.CarOwners = carOwnerViewModels;
 
-				return View("EditCar", model);
+                return View("EditCar", model);
             }
 
-			var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == model.Id);
+            var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == model.Id);
 
             if (existingCar != null)
             {
                 existingCar.PlateNumber = model.PlateNumber;
-				existingCar.OwnerId = model.CarOwnerId;
+                existingCar.OwnerId = model.CarOwnerId;
 
                 _applicationDbContext.SaveChanges();
             }
@@ -160,7 +162,7 @@ namespace ChargeIt.Controllers
             return RedirectToAction("Index");
         }
 
-		public IActionResult DeleteCar(int id)
+        public IActionResult DeleteCar(int id)
         {
             var existingCar = _applicationDbContext.Cars.FirstOrDefault(cm => cm.Id == id);
 
@@ -173,48 +175,48 @@ namespace ChargeIt.Controllers
             return RedirectToAction("Index");
         }
 
-		public IActionResult CarDetails(int id)
-		{
-			var existingCar = _applicationDbContext.Cars.Include(c => c.Owner).FirstOrDefault(c => c.Id == id);
+        public IActionResult CarDetails(int id)
+        {
+            var existingCar = _applicationDbContext.Cars.Include(c => c.Owner).FirstOrDefault(c => c.Id == id);
 
-			if (existingCar == null)
-			{
-				return RedirectToAction("Index");
-			}
+            if (existingCar == null)
+            {
+                return RedirectToAction("Index");
+            }
 
-			var availableBookings = _applicationDbContext.Bookings
-				.Include(b => b.ChargeMachine)
-				.Where(b => b.CarId == existingCar.Id)
-				.OrderByDescending(b => b.StartTime)
-				.ToList();
+            var availableBookings = _applicationDbContext.Bookings
+                .Include(b => b.ChargeMachine)
+                .Where(b => b.CarId == existingCar.Id)
+                .OrderByDescending(b => b.StartTime)
+                .ToList();
 
-			var carDetailsViewModel = new CarDetailsViewModel()
-			{
-				Car = new CarViewModel()
-				{
-					Id = existingCar.Id,
-					PlateNumber = existingCar.PlateNumber,
-					CarOwner = $"{existingCar.Owner.Name} {existingCar.Owner.Email}"
-				},
-				Bookings = availableBookings.Select(ab => new BookingViewModel
-				{
-					Id = ab.Id,
-					Code = ab.Code,
-					StartTime = ab.StartTime,
-					ChargeMachine = new ChargeMachineViewModel()
-					{
-						Id = ab.ChargeMachine.Id,
-						City = ab.ChargeMachine.City,
-						Code = ab.ChargeMachine.Code,
-						Latitude = ab.ChargeMachine.Latitude,
-						Longitude = ab.ChargeMachine.Longitude,
-						Number = ab.ChargeMachine.Number,
-						Street = ab.ChargeMachine.Street
-					}
-				}).ToList()
-			};
+            var carDetailsViewModel = new CarDetailsViewModel()
+            {
+                Car = new CarViewModel()
+                {
+                    Id = existingCar.Id,
+                    PlateNumber = existingCar.PlateNumber,
+                    CarOwner = $"{existingCar.Owner.Name} {existingCar.Owner.Email}"
+                },
+                Bookings = availableBookings.Select(ab => new BookingViewModel
+                {
+                    Id = ab.Id,
+                    Code = ab.Code,
+                    StartTime = ab.StartTime,
+                    ChargeMachine = new ChargeMachineViewModel()
+                    {
+                        Id = ab.ChargeMachine.Id,
+                        City = ab.ChargeMachine.City,
+                        Code = ab.ChargeMachine.Code,
+                        Latitude = ab.ChargeMachine.Latitude,
+                        Longitude = ab.ChargeMachine.Longitude,
+                        Number = ab.ChargeMachine.Number,
+                        Street = ab.ChargeMachine.Street
+                    }
+                }).ToList()
+            };
 
-			return View(carDetailsViewModel);
-		}
-	}
+            return View(carDetailsViewModel);
+        }
+    }
 }

@@ -1,4 +1,6 @@
 ﻿@model List<ChargeMachineViewModel>
+@using Newtonsoft.Json
+
 
 <link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
 
@@ -70,12 +72,57 @@
     </tbody>
 </table>
 
+<div id="googleMap" style="height:400px;width:100%;"></div>
+<script>
+function initMap(position) {
+    var myCenter = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var mapProp = { center: myCenter, zoom: 12, scrollwheel: false, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
+    var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+    var data = @Html.Raw(JsonConvert.SerializeObject(this.Model));
+
+    $.each(data, function(i, item) {
+        var marker = new google.maps.Marker({
+            'position': new google.maps.LatLng(item.Latitude, item.Longitude),
+            'map': map,
+            'title': item.Code
+        });
+
+        var infowindow = new google.maps.InfoWindow({    
+        content: "<div><h5>" + item.Code + "</h5>" + 
+        "<p> <b>City: </b>" + item.City + "</p>" +
+        "<p> <b>Street: </b>" + item.Street + "</p>" +
+        "<p> <b>Number: </b>" + item.Number + "</p>" +
+        
+        "</div>"
+        });   
+
+        google.maps.event.addListener(marker, 'click', function () {    
+            infowindow.open(map, marker);    
+        });  
+    });    
+
+      
+}
+    
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(initMap);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js"></script>
+
 <script src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready( function () {
+    $(document).ready(function() {
         $('#charge-machines-table').DataTable();
-    } );
+        getLocation();
+    });
 </script>
 
 
