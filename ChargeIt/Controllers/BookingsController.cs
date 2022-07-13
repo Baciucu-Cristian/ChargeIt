@@ -130,7 +130,6 @@ namespace ChargeIt.Controllers
                 <p><b>City:</b>{booking.ChargeMachine.City}</p>
                 <p><b>Street:</b>{booking.ChargeMachine.Street}</p>
                 <p><b>Number:</b>{booking.ChargeMachine.Number}</p>
-                <img src=""{qrCode}"" alt=""QR code"" width=""200""/>
             ";
 
             var message = new MailMessage();
@@ -140,22 +139,27 @@ namespace ChargeIt.Controllers
             message.IsBodyHtml = true;
             message.Body = emailBody;
 
-            var smtpClient = new SmtpClient("smtp.gmail.com")
+            using (MemoryStream ms = new MemoryStream(qrCode))
             {
-                Port = 587,
-                Credentials = new NetworkCredential(_emailSettings.EmailAddress, _emailSettings.AppPassword),
-                EnableSsl = true,
-            };
+                message.Attachments.Add(new Attachment(ms, $"{booking.Code}.png"));
 
-            smtpClient.Send(message);
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential(_emailSettings.EmailAddress, _emailSettings.AppPassword),
+                    EnableSsl = true,
+                };
+
+                smtpClient.Send(message);
+            }
         }
 
-        private string GetBookingQRCode(Guid code)
+        private byte[] GetBookingQRCode(Guid code)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(code.ToString(), QRCodeGenerator.ECCLevel.Q);
             var bitmapByteQRCode = new BitmapByteQRCode(qrCodeData);
-            var encodedQrCode = "data:image/png;base64," + Convert.ToBase64String(bitmapByteQRCode.GetGraphic(20));
+            var encodedQrCode = bitmapByteQRCode.GetGraphic(5);
             return encodedQrCode;
         }
 
