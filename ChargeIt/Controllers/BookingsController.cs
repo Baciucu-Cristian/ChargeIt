@@ -1,9 +1,11 @@
 ﻿using ChargeIt.Data;
 using ChargeIt.Data.DbModels;
 using ChargeIt.Models;
+using ChargeIt.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QRCoder;
 using System.Net;
 using System.Net.Mail;
 
@@ -13,13 +15,14 @@ namespace ChargeIt.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly EmailSettings _emailSettings;
         private readonly List<int> _totalAvailableHours;
         private const int TotalAvailableHoursInADay = 24;
 
-        public BookingsController(ApplicationDbContext applicationDbContext)
+        public BookingsController(ApplicationDbContext applicationDbContext, EmailSettings emailSettings)
         {
             _applicationDbContext = applicationDbContext;
-
+            _emailSettings = emailSettings;
             _totalAvailableHours = new List<int>();
 
             for (var hour = 0; hour < TotalAvailableHoursInADay; hour++)
@@ -118,31 +121,59 @@ namespace ChargeIt.Controllers
                 .ThenInclude(c => c.Owner)
                 .FirstOrDefault(b => b.Id == bookingId);
 
-            var smtpClient = new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("chargeitnetrom@gmail.com", "1234QAZ."),
-                EnableSsl = true,
-            };
+            var qrCode = GetBookingQRCode(booking.Code);
 
             var emailBody = @$"<h3>A new order has been created for your car : {booking.Car.PlateNumber}</h3>
                 <p><b>Order number:</b>{booking.Code}</p>
-                <p><b>Interval:</b>{booking.StartTime.ToString("yyyy-MM-dd HH:MM")} - {booking.EndTime.ToString("yyyy-MM-dd HH:MM")}</p>
+                <p><b>Interval:</b>{booking.StartTime.ToString("yyyy-MM-dd HH:mm")} - {booking.EndTime.ToString("yyyy-MM-dd HH:mm")}</p>
                 <p><b>Charge machine code:</b>{booking.ChargeMachine.Code}</p>
                 <p><b>City:</b>{booking.ChargeMachine.City}</p>
                 <p><b>Street:</b>{booking.ChargeMachine.Street}</p>
                 <p><b>Number:</b>{booking.ChargeMachine.Number}</p>
+                <img src=""{qrCode}"" alt=""QR code"" width=""200""/>
             ";
 
-            smtpClient.Send("chargeitnetrom@gmail.com", "baciucucristianiulian@yahoo.com", "New booking was created for you", emailBody);
+            var message = new MailMessage();
+            message.From = new MailAddress(_emailSettings.EmailAddress);
+            message.To.Add(booking.Car.Owner.Email);
+            message.Subject = "New booking was created for you";
+            message.IsBodyHtml = true;
+            message.Body = emailBody;
+
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential(_emailSettings.EmailAddress, _emailSettings.AppPassword),
+                EnableSsl = true,
+            };
+
+            smtpClient.Send(message);
+        }
+
+        private string GetBookingQRCode(Guid code)
+        {
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(code.ToString(), QRCodeGenerator.ECCLevel.Q);
+            var bitmapByteQRCode = new BitmapByteQRCode(qrCodeData);
+            var encodedQrCode = "data:image/png;base64," + Convert.ToBase64String(bitmapByteQRCode.GetGraphic(20));
+            return encodedQrCode;
         }
 
         [HttpGet("Bookings/GetAvailableIntervals")]
         public ActionResult<List<int>> GetAvailableIntervals(int chargeMachineId, DateTime date)
         {
             var notAvailableHours = _applicationDbContext.Bookings.Where(b => b.ChargeMachineId == chargeMachineId && b.StartTime >= date && b.StartTime <= date.AddHours(23).AddMinutes(59).AddSeconds(59)).Select(b => b.StartTime.Hour).ToList();
+            var currentDate = DateTime.Now;
+            var totalAvailableHours = _totalAvailableHours;
 
-            var availableHours = _totalAvailableHours.Except(notAvailableHours).ToList();
+            if (date.Date == currentDate.Date)
+            {
+                var currentHour = currentDate.Hour;
+
+                totalAvailableHours = totalAvailableHours.Where(tav => tav > currentHour).ToList();
+            }
+
+            var availableHours = totalAvailableHours.Except(notAvailableHours).ToList();
 
             return availableHours;
         }
