@@ -1,38 +1,46 @@
 ﻿@model StationDetailsViewModel
+@using Newtonsoft.Json
 
 <link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
 
 <h1 class="margin-bottom-40">Machine code: @Model.ChargeMachine.Code</h1>
 
-<div class="card" style="width: 30rem;">
-  <img class="card-img-top" src="https://astros.in/wp-content/uploads/2018/10/electrifyamericachargersbybtcpower1.jpg" alt="Station">
-  <div class="card-body">
-    <h5 class="card-title">@Model.ChargeMachine.Code</h5>
-    <div>
-         <label asp-for="ChargeMachine.City" class="details-label-form"></label>
-         <span> @Model.ChargeMachine.City </span>
-    </div>
+<div class="row mb-3">
+    <div class="col-6">
+        <div class="card shadow p-3 mb-5 bg-white rounded" style="width: 100%">
+          <img class="card-img-top" src="https://astros.in/wp-content/uploads/2018/10/electrifyamericachargersbybtcpower1.jpg" alt="Station">
+          <div class="card-body">
+            <h5 class="card-title">@Model.ChargeMachine.Code</h5>
+            <div>
+                 <label asp-for="ChargeMachine.City" class="details-label-form"></label>
+                 <span> @Model.ChargeMachine.City </span>
+            </div>
 
-    <div>
-         <label asp-for="ChargeMachine.Street" class="details-label-form"></label>
-         <span> @Model.ChargeMachine.Street </span>
-     </div>
+            <div>
+                 <label asp-for="ChargeMachine.Street" class="details-label-form"></label>
+                 <span> @Model.ChargeMachine.Street </span>
+             </div>
 
-     <div>
-         <label asp-for="ChargeMachine.Number" class="details-label-form"></label>
-        <span> @Model.ChargeMachine.Number </span>
-    </div>
+             <div>
+                 <label asp-for="ChargeMachine.Number" class="details-label-form"></label>
+                <span> @Model.ChargeMachine.Number </span>
+            </div>
 
-    <div>
-        <label asp-for="ChargeMachine.Latitude" class="details-label-form"></label>
-        <span> @Model.ChargeMachine.Latitude </span>
-    </div>
+            <div>
+                <label asp-for="ChargeMachine.Latitude" class="details-label-form"></label>
+                <span> @Model.ChargeMachine.Latitude </span>
+            </div>
 
-    <div>
-        <label asp-for="ChargeMachine.Longitude" class="details-label-form"></label>
-        <span> @Model.ChargeMachine.Longitude </span>
+            <div>
+                <label asp-for="ChargeMachine.Longitude" class="details-label-form"></label>
+                <span> @Model.ChargeMachine.Longitude </span>
+            </div>
+          </div>
+        </div>
     </div>
-  </div>
+    <div class="col-6">
+        <div id="googleMap" style="height:400px;width:100%;"></div>
+    </div>
 </div>
 
 <h1 class="margin-bottom-40 margin-top-40">Bookings history</h1>
@@ -77,10 +85,46 @@
     </tbody>
 </table>
 
+
 <script src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<script>
+function initMap(position) { 
+        var data = @Html.Raw(JsonConvert.SerializeObject(this.Model));
+        var markerPosition = new google.maps.LatLng(data.ChargeMachine.Latitude, data.ChargeMachine.Longitude);
+        var mapProp = { center: markerPosition, zoom: 12, scrollwheel: false, draggable: true, mapTypeId: google.maps.MapTypeId.ROADMAP };
+        var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+        var marker = new google.maps.Marker({ position: markerPosition });  
+        marker.setMap(map);  
+
+        var infowindow = new google.maps.InfoWindow({    
+            content: "<div><h5>" + data.ChargeMachine.Code + "</h5>" + 
+            "<p> <b>City: </b>" + data.ChargeMachine.City + "</p>" +
+            "<p> <b>Street: </b>" + data.ChargeMachine.Street + "</p>" +
+            "<p> <b>Number: </b>" + data.ChargeMachine.Number + "</p>" +
+            "</div>"
+        });   
+
+        google.maps.event.addListener(marker, 'click', function () {    
+            infowindow.open(map, marker);    
+        });  
+    }
+    
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(initMap);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js"></script>
 
 <script>
     $(document).ready( function () {
         $('#bookings-table').DataTable();
+        getLocation();
     } );
 </script>
